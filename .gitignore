@@ -1,0 +1,21 @@
+# 原始数据不提交（来源、许可与哈希记录在 data/SOURCE.md）
+data/raw/*
+!data/raw/.gitkeep
+*.zip
+
+# 学习计划与个人过程记录（仅本地保留，不上传）
+data/SOURCE.md
+docs/ai-collaboration.md
+docs/decisions.md
+docs/acceptance-criteria.md
+CLAUDE.md
+.claude/agents/oracle.md
+
+# 密钥与本地配置
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
