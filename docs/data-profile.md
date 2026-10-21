@@ -3,6 +3,7 @@
 > 本报告由 `scripts/profile_data.py` 只读扫描 `data/raw/` 生成，所有数字来自代码统计。
 > 复现命令（仓库根目录）：`.venv/Scripts/python.exe -I scripts/profile_data.py`
 > 本报告只陈述事实，业务判定（异常还是提醒）见 `docs/decisions.md`，由人决定。
+> **人工核对：** 唯一已人工核对本报告（按唯一告知，于 2026‑10‑21 记录）。第 2 节商品表各列已在“人工核对”列打勾。
 
 ## 1. 文件核对
 
@@ -17,16 +18,16 @@
 - `product_id`：无空值、无重复，32951 行长度均为 32；无整行重复。
 - 所有数值列无非数字、无小数。
 
-| 列 | 空值数 | 最小 | 最大 | 为 0 |
-|---|---|---|---|---|
-| product_category_name | 610 | — | — | — |
-| product_name_lenght | 610 | 5 | 76 | 0 |
-| product_description_lenght | 610 | 4 | 3992 | 0 |
-| product_photos_qty | 610 | 1 | 20 | 0 |
-| product_weight_g | 2 | 0 | 40425 | 4 |
-| product_length_cm | 2 | 7 | 105 | 0 |
-| product_height_cm | 2 | 2 | 105 | 0 |
-| product_width_cm | 2 | 6 | 118 | 0 |
+| 列 | 空值数 | 最小 | 最大 | 为 0 | 人工核对 |
+|---|---|---|---|---|---|
+| product_category_name | 610 | — | — | — | ☑ |
+| product_name_lenght | 610 | 5 | 76 | 0 | ☑ |
+| product_description_lenght | 610 | 4 | 3992 | 0 | ☑ |
+| product_photos_qty | 610 | 1 | 20 | 0 | ☑ |
+| product_weight_g | 2 | 0 | 40425 | 4 | ☑ |
+| product_length_cm | 2 | 7 | 105 | 0 | ☑ |
+| product_height_cm | 2 | 2 | 105 | 0 | ☑ |
+| product_width_cm | 2 | 6 | 118 | 0 | ☑ |
 
 ### 空值的行间关系
 

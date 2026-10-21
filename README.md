@@ -33,6 +33,7 @@
 
 - [数据字典](docs/data-dictionary.md)
 - [数据盘点报告](docs/data-profile.md)
+- [校验报告](docs/validation-report.md)
 
 ## 启动方式
 

@@ -1,0 +1,16 @@
+product_id,product_category_name,product_name_lenght,product_description_lenght,product_photos_qty,product_weight_g,product_length_cm,product_height_cm,product_width_cm
+TEST_ONLY_ok,cat_a,10,20,1,100,10,10,10
+TEST_ONLY_spaces,cat_a,10,20,1, 100 ,10,10,10
+,cat_a,10,20,1,100,10,10,10
+   ,cat_a,10,20,1,100,10,10,10
+TEST_ONLY_dup,cat_a,10,20,1,100,10,10,10
+TEST_ONLY_dup,cat_a,10,20,1,100,10,10,10
+TEST_ONLY_float_weight,cat_a,10,20,1,12.5,10,10,10
+TEST_ONLY_text_photos,cat_a,10,20,abc,100,10,10,10
+TEST_ONLY_zero_length,cat_a,10,20,1,100,0,10,10
+TEST_ONLY_neg_height,cat_a,10,20,1,100,10,-3,10
+TEST_ONLY_neg_weight,cat_a,10,20,1,-1,10,10,10
+TEST_ONLY_zero_weight,cat_a,10,20,1,0,10,10,10
+TEST_ONLY_empty_width,cat_a,10,20,1,100,10,10,
+TEST_ONLY_unknown_cat,cat_zzz,10,20,1,100,10,10,10
+TEST_ONLY_empty_cat,,,,,100,10,10,10
