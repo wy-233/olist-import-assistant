@@ -34,7 +34,31 @@
 - [数据字典](docs/data-dictionary.md)
 - [数据盘点报告](docs/data-profile.md)
 - [校验报告](docs/validation-report.md)
+- [导入报告](docs/import-report.md)
 
 ## 启动方式
 
-第 4 天补充。
+前置：本机 MySQL 5.7，建库 `olist_import` 与 `olist_import_test`（utf8mb4），项目根目录建 `.env`（已被 Git 忽略）：
+
+```
+OLIST_DB_HOST=127.0.0.1
+OLIST_DB_PORT=3306
+OLIST_DB_USER=root
+OLIST_DB_PASSWORD=<你的密码>
+OLIST_DB_NAME=olist_import
+OLIST_DB_NAME_TEST=olist_import_test
+```
+
+在仓库根目录依次执行：
+
+```
+.venv/Scripts/python.exe -m pip install pymysql
+mysql -u root -p olist_import < sql/schema.sql              # 建表（会 DROP 同名表，仅学习环境）
+.venv/Scripts/python.exe scripts/load_translation.py        # 载入 71 行类目翻译
+.venv/Scripts/python.exe scripts/import_products.py --dry-run   # 只计算，不写库
+.venv/Scripts/python.exe scripts/import_products.py --apply     # 导入；同文件再跑一次应为 0 新增
+.venv/Scripts/python.exe scripts/run_import_report.py       # 生成 docs/import-report.md
+.venv/Scripts/python.exe -m unittest discover -s tests -t . # 全部测试
+```
+
+独立对账 SQL：`sql/reconcile.sql`。
