@@ -31,7 +31,7 @@ REPORT = ROOT / "docs" / "validation-report.md"
 
 REASON_TEXT = {
     "ID_MISSING": "product_id 缺失",
-    "ID_DUPLICATE": "product_id 重复（含首次出现的行）",
+    "ID_DUPLICATE": "product_id 重复（第一条保留，之后出现的行拒绝）",
     "NON_INTEGER": "数值列存在非整数文本",
     "DIM_MISSING": "重量或尺寸为空（D-004）",
     "WEIGHT_NONPOSITIVE": "重量小于等于 0（D-005）",

@@ -32,7 +32,7 @@
 | 原因代码 | 含义 | 行数 |
 |---|---|---|
 | ID_MISSING | product_id 缺失 | 0 |
-| ID_DUPLICATE | product_id 重复（含首次出现的行） | 0 |
+| ID_DUPLICATE | product_id 重复（第一条保留，之后出现的行拒绝） | 0 |
 | NON_INTEGER | 数值列存在非整数文本 | 0 |
 | DIM_MISSING | 重量或尺寸为空（D-004） | 2 |
 | WEIGHT_NONPOSITIVE | 重量小于等于 0（D-005） | 4 |

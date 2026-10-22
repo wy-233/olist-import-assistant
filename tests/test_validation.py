@@ -64,8 +64,9 @@ class FixtureRules(unittest.TestCase):
         self.assertEqual(self.by_line[4].reasons, (ID_MISSING,))
         self.assertEqual(self.by_line[5].reasons, (ID_MISSING,))
 
-    def test_duplicate_id_marks_every_occurrence(self):
-        self.assertEqual(self.by_line[6].reasons, (ID_DUPLICATE,))
+    def test_duplicate_id_keeps_first_and_rejects_later(self):
+        self.assertEqual(self.by_line[6].status, VALID)
+        self.assertEqual(self.by_line[6].reasons, ())
         self.assertEqual(self.by_line[7].reasons, (ID_DUPLICATE,))
 
     def test_non_integer_text(self):
@@ -88,8 +89,8 @@ class FixtureRules(unittest.TestCase):
     def test_fixture_reconciliation(self):
         s = summarize(self.results)
         self.assertEqual(s["total"], 15)
-        self.assertEqual(s["valid"], 2)
-        self.assertEqual(s["rejected"], 13)
+        self.assertEqual(s["valid"], 3)
+        self.assertEqual(s["rejected"], 12)
         self.assertTrue(s["reconciled"])
 
     def test_warning_level_is_reserved_but_unused(self):

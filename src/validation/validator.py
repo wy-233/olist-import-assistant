@@ -119,15 +119,19 @@ def _row_reasons(row, translation_keys):
 def validate_rows(rows, translation_keys):
     """rows: [(csv_line, 行字典)]；translation_keys: 类目翻译表中的类目集合。
 
-    重复 ID 按去除首尾空白后精确比较；所有出现该 ID 的行（含首次）都标 ID_DUPLICATE。
+    重复 ID 按去除首尾空白后精确比较；第一次出现的行按其他规则判定，
+    之后再出现的同 ID 行标 ID_DUPLICATE（保留第一条，决策 D-013）。
     """
     translation_keys = {k.strip() for k in translation_keys}
-    id_counts = Counter(row[COL_ID].strip() for _, row in rows if not is_blank(row.get(COL_ID)))
+    seen_ids = set()
     results = []
     for line, row in rows:
         reasons = _row_reasons(row, translation_keys)
-        if not is_blank(row.get(COL_ID)) and id_counts[row[COL_ID].strip()] > 1:
-            reasons.append(ID_DUPLICATE)
+        if not is_blank(row.get(COL_ID)):
+            pid = row[COL_ID].strip()
+            if pid in seen_ids:
+                reasons.append(ID_DUPLICATE)
+            seen_ids.add(pid)
         reasons = tuple(r for r in REJECT_REASONS if r in reasons)
         status = REJECTED if reasons else VALID
         results.append(RowResult(line, row.get(COL_ID, ""), row, status, reasons))

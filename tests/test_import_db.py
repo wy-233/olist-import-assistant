@@ -66,22 +66,22 @@ class ImportDbTest(unittest.TestCase):
         self.assertEqual(
             (stats["rows_total"], stats["rows_inserted"], stats["rows_skipped"],
              stats["rows_conflict"], stats["rows_rejected"]),
-            (15, 2, 0, 0, 13),
+            (15, 3, 0, 0, 12),
         )
-        self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM products"), 2)
+        self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM products"), 3)
         self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM product_raw WHERE batch_id=%s", (stats["batch_id"],)), 15)
 
     def test_dry_run_writes_nothing(self):
         stats = self.run_import("dry_run")
-        self.assertEqual(stats["rows_inserted"], 2)
+        self.assertEqual(stats["rows_inserted"], 3)
         for table in ("products", "product_raw", "import_batch"):
             self.assertEqual(_scalar(self.conn, f"SELECT COUNT(*) FROM {table}"), 0)
 
     def test_second_import_is_idempotent(self):
         self.run_import()
         stats = self.run_import()
-        self.assertEqual((stats["rows_inserted"], stats["rows_skipped"], stats["rows_conflict"]), (0, 2, 0))
-        self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM products"), 2)
+        self.assertEqual((stats["rows_inserted"], stats["rows_skipped"], stats["rows_conflict"]), (0, 3, 0))
+        self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM products"), 3)
         self.assertEqual(_scalar(self.conn, "SELECT COUNT(*) FROM import_batch"), 2)
 
     def test_changed_field_is_conflict_and_not_overwritten(self):
@@ -90,13 +90,13 @@ class ImportDbTest(unittest.TestCase):
             cur.execute("UPDATE products SET weight_g = 999 WHERE product_id = 'TEST_ONLY_ok'")
         self.conn.commit()
         stats = self.run_import()
-        self.assertEqual((stats["rows_inserted"], stats["rows_skipped"], stats["rows_conflict"]), (0, 1, 1))
+        self.assertEqual((stats["rows_inserted"], stats["rows_skipped"], stats["rows_conflict"]), (0, 2, 1))
         self.assertEqual(_scalar(self.conn, "SELECT weight_g FROM products WHERE product_id = 'TEST_ONLY_ok'"), 999)
 
     def test_rejected_rows_never_reach_products(self):
         self.run_import()
         ids = {r[0] for r in self._all("SELECT product_id FROM products")}
-        self.assertEqual(ids, {"TEST_ONLY_ok", "TEST_ONLY_spaces"})
+        self.assertEqual(ids, {"TEST_ONLY_ok", "TEST_ONLY_spaces", "TEST_ONLY_dup"})
         self.assertEqual(
             _scalar(self.conn, "SELECT COUNT(*) FROM product_raw WHERE status='rejected' AND import_result<>'not_attempted'"),
             0,
