@@ -35,6 +35,7 @@
 - [数据盘点报告](docs/data-profile.md)
 - [校验报告](docs/validation-report.md)
 - [导入报告](docs/import-report.md)
+- [演示脚本](docs/demo-script.md)
 
 ## 启动方式
 
@@ -52,7 +53,7 @@ OLIST_DB_NAME_TEST=olist_import_test
 在仓库根目录依次执行：
 
 ```
-.venv/Scripts/python.exe -m pip install pymysql
+.venv/Scripts/python.exe -m pip install pymysql fastapi uvicorn httpx python-multipart
 mysql -u root -p olist_import < sql/schema.sql              # 建表（会 DROP 同名表，仅学习环境）
 .venv/Scripts/python.exe scripts/load_translation.py        # 载入 71 行类目翻译
 .venv/Scripts/python.exe scripts/import_products.py --dry-run   # 只计算，不写库
@@ -61,4 +62,26 @@ mysql -u root -p olist_import < sql/schema.sql              # 建表（会 DROP 
 .venv/Scripts/python.exe -m unittest discover -s tests -t . # 全部测试
 ```
 
+第 4 天已建好表、不想重建时，先备份再执行一次迁移（只跑一次）：
+
+```
+mysqldump -u root -p olist_import > backup_before_002.sql
+mysql -u root -p olist_import < sql/migrations/002_preview_approval.sql
+```
+
 独立对账 SQL：`sql/reconcile.sql`。
+
+## 网页端（第 5 天）
+
+```
+.venv/Scripts/python.exe scripts/run_api.py     # http://127.0.0.1:8000/docs
+```
+
+| 接口 | 作用 |
+|---|---|
+| `POST /imports/preview` | 上传 CSV，返回校验与导入计划；只写一条预览记录，不写商品表 |
+| `POST /imports/{id}/approve` | 人工审批并写入；确认文本为 `APPROVE <id> <预览新增数>` |
+| `GET /imports/{id}/report` | 批次报告与对账检查 |
+| `GET /products` | 分页查询已入库商品 |
+
+没有认证：`approver` 仅留痕，不构成权限控制。完整演示步骤见 [演示脚本](docs/demo-script.md)。

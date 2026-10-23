@@ -62,24 +62,36 @@ def is_blank(value):
     return value is None or value.strip() == ""
 
 
+def _read_records(reader):
+    """从一个 csv.reader 读出 (表头, [(csv_line, 行字典)])；原始值按字符串原样保留。"""
+    try:
+        header = next(reader)
+    except StopIteration:
+        raise ValueError("文件为空：缺少表头") from None
+    rows = []
+    while True:
+        start = reader.line_num + 1
+        try:
+            record = next(reader)
+        except StopIteration:
+            break
+        if not record:
+            continue
+        if len(record) != len(header):
+            raise ValueError(f"第 {start} 行列数 {len(record)} 与表头 {len(header)} 不一致")
+        rows.append((start, dict(zip(header, record))))
+    return header, rows
+
+
 def read_csv(path):
     """返回 (表头, [(csv_line, 行字典), ...])；原始值按字符串原样保留。"""
-    rows = []
     with open(Path(path), newline="", encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        while True:
-            start = reader.line_num + 1
-            try:
-                record = next(reader)
-            except StopIteration:
-                break
-            if not record:
-                continue
-            if len(record) != len(header):
-                raise ValueError(f"第 {start} 行列数 {len(record)} 与表头 {len(header)} 不一致")
-            rows.append((start, dict(zip(header, record))))
-    return header, rows
+        return _read_records(csv.reader(f))
+
+
+def read_csv_stream(stream):
+    """同 read_csv，从已打开的文本流读取（用于上传内容）。行号口径与 read_csv 一致。"""
+    return _read_records(csv.reader(stream))
 
 
 def _row_reasons(row, translation_keys):

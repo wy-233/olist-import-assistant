@@ -3,6 +3,9 @@
 不连接数据库、不读写文件，全部是纯函数，便于在没有 MySQL 的环境下测试。
 标准层字段名取自 docs/data-dictionary.md 的“标准字段名”列。
 """
+import hashlib
+import json
+
 from src.validation.validator import COL_CATEGORY, COL_ID
 
 INSERTED = "inserted"
@@ -67,6 +70,19 @@ def plan_import(results, existing):
         else:
             conflicts.append((pid, result.csv_line))
     return to_insert, skipped, conflicts
+
+
+def plan_fingerprint(to_insert, skipped, conflicts, rejected):
+    """计划指纹：四类计数 + 排序后的新增 ID 与冲突 ID。审批时重算，不一致说明预览已过期。"""
+    payload = json.dumps(
+        {
+            "counts": [len(to_insert), len(skipped), len(conflicts), rejected],
+            "insert": sorted(standard["product_id"] for _, standard in to_insert),
+            "conflict": sorted(pid for pid, _ in conflicts),
+        },
+        ensure_ascii=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def summarize_plan(to_insert, skipped, conflicts, rejected):

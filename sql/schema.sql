@@ -11,12 +11,14 @@ DROP TABLE IF EXISTS category_translation;
 DROP TABLE IF EXISTS import_batch;
 
 -- 每次导入一行，记录该批的四分类计数（AC-3 / AC-4 的证据）
+-- status：previewed=已预览待审批；running=审批通过写入中；succeeded；failed；stale=审批时计划已变化，需重新预览
+-- 预览批次的 rows_* 是“计划数”；审批写入后改写为实际数
 CREATE TABLE import_batch (
   batch_id        BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   file_name       VARCHAR(255) NOT NULL,
   file_sha256     CHAR(64)     NOT NULL,
   mode            ENUM('dry_run','apply') NOT NULL,
-  status          ENUM('running','succeeded','failed') NOT NULL DEFAULT 'running',
+  status          ENUM('previewed','running','succeeded','failed','stale') NOT NULL DEFAULT 'running',
   rows_total      INT NOT NULL DEFAULT 0,
   rows_inserted   INT NOT NULL DEFAULT 0,
   rows_skipped    INT NOT NULL DEFAULT 0,
@@ -25,6 +27,11 @@ CREATE TABLE import_batch (
   rows_pending    INT NOT NULL DEFAULT 0,
   started_at      DATETIME NOT NULL,
   finished_at     DATETIME NULL,
+  plan_fingerprint CHAR(64) NULL,
+  approved_by     VARCHAR(64) NULL,
+  approved_at     DATETIME NULL,
+  -- 预览时上传的文件内容；审批只写这份内容，保证“审的就是导入的”
+  file_content    MEDIUMBLOB  NULL,
   KEY idx_sha (file_sha256)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
