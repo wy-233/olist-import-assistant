@@ -196,6 +196,7 @@ class MigrationParityTest(unittest.TestCase):
         # 先按 schema.sql 重建，再删子表与 import_batch（product_raw 有外键指向后者）
         _rebuild_schema(self.conn)
         with self.conn.cursor() as cur:
+            cur.execute("DROP TABLE ai_review_log")
             cur.execute("DROP TABLE product_raw")
             cur.execute("DROP TABLE import_batch")
             cur.execute(OLD_IMPORT_BATCH)

@@ -5,6 +5,7 @@
 
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS ai_review_log;
 DROP TABLE IF EXISTS product_raw;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS category_translation;
@@ -79,4 +80,22 @@ CREATE TABLE products (
 CREATE TABLE category_translation (
   category_name     VARCHAR(100) COLLATE utf8mb4_bin NOT NULL PRIMARY KEY,
   category_name_en  VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- AI 审核日志：模型的输入、原始输出、守卫结论。AI 只写这张表；adopted 只能由人置 1（第 6 天未实现采纳）
+CREATE TABLE ai_review_log (
+  log_id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  batch_id          BIGINT UNSIGNED NOT NULL,
+  kind              ENUM('explain','mapping') NOT NULL,
+  model_name        VARCHAR(100) NOT NULL,
+  prompt_sha256     CHAR(64)     NOT NULL,
+  input_json        MEDIUMTEXT   NOT NULL,
+  raw_output        MEDIUMTEXT   NULL,
+  parsed_json       MEDIUMTEXT   NULL,
+  guard_verdict     ENUM('passed','blocked','error') NOT NULL,
+  guard_violations  TEXT         NOT NULL,
+  adopted           TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at        DATETIME     NOT NULL,
+  KEY idx_batch (batch_id, created_at),
+  CONSTRAINT fk_ai_batch FOREIGN KEY (batch_id) REFERENCES import_batch (batch_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -11,17 +11,20 @@ from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
+from src.api.ai_routes import router as ai_router  # noqa: E402
 from src.api.service import MAX_UPLOAD_BYTES, ServiceError, Store  # noqa: E402
 from src.db.connection import connect  # noqa: E402
 
 app = FastAPI(
     title="商品目录导入助手（学习 MVP）",
-    version="0.5",
+    version="0.6",
     description=(
         "预览阶段只读：不写入 products 与 product_raw。审批通过后才写入，且只写预览确定的新增行。\n\n"
-        "审批没有认证，approver 仅用于留痕，不构成权限控制。"
+        "审批没有认证，approver 仅用于留痕，不构成权限控制。\n\n"
+        "AI 审核接口只记日志，不改数据、不审批。"
     ),
 )
+app.include_router(ai_router)
 
 
 def get_store() -> Store:

@@ -85,3 +85,32 @@ mysql -u root -p olist_import < sql/migrations/002_preview_approval.sql
 | `GET /products` | 分页查询已入库商品 |
 
 没有认证：`approver` 仅留痕，不构成权限控制。完整演示步骤见 [演示脚本](docs/demo-script.md)。
+
+## AI 审核（第 6 天）
+
+| 接口 | 作用 |
+|---|---|
+| `POST /imports/{id}/ai-review` | 对一个批次请求 DeepSeek 做“异常解释”和“字段映射建议”；输出先过守卫，再写入 `ai_review_log` |
+
+- AI 不改商品数据、不改批次状态、不审批；映射建议只记日志（`adopted` 恒为 0，采纳功能未实现）。
+- 发给外部模型的内容只有：表头、代码算出的计数、最多 5 条拒绝样本（每个值截断到 64 字符）。
+- 守卫整条拦截：数字与代码计数不符、说明文字含数字、虚构列、非标准目标列、重复映射、任何未声明的键（如 value / fill / approve）、非 JSON 输出。被拦截和调用失败的结果也写入日志，状态分别为 `blocked` / `error`。
+- 当前上传预览要求表头已是标准列名，所以映射建议在现有流程里基本是“恒等映射”，主要用于证明守卫有效。
+
+在 `.env` 中增加（`.env` 已被 Git 忽略，Key 不要写进代码或文档）：
+
+```
+DEEPSEEK_API_KEY=<你的 Key>
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+```
+
+后两项可省略，默认值如上；模型名请以 DeepSeek 官方文档为准。未配置 Key 时接口返回 503。
+每次请求最多触发 2 次付费模型调用（本批没有拒绝行时只调用 1 次），并写入对应的日志行；接口没有鉴权与限流。
+
+对已有库先备份再执行一次迁移（只跑一次，不改动已有表）：
+
+```
+mysqldump -u root -p olist_import > backup_before_003.sql
+mysql -u root -p olist_import < sql/migrations/003_ai_review_log.sql
+```
